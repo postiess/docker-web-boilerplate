@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  web:
+    build: # Directory of dockerfile to build web app
+    ports:
+      - 3000
+    restart: always
+    depends_on:
+      - db
+    environment:
+      - DB_URI = "postgresql://user:pass@db:5432/yourdb"
+  db:
+    image: postgres:14
+    restart: always
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=yourdb
+      - POSTGRES_PORT=5432
+    ports:
+      - 5432
+    volumes:
+      # make data persistent
+      - ./postgres-data:/var/lib/postgresql/data
+      # copy the sql script to create tables & init db
+      - ./sql-init.sql:/docker-entrypoint-initdb.d/sql-init.sql
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - /data/caddy/data:/data
+      - /data/caddy/config:/config
+
+# make sure to open all required ports through firewall

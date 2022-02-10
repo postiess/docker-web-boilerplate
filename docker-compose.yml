@@ -3,6 +3,7 @@ version: '3'
 services:
   web:
     build: # Directory of dockerfile to build web app, exposed on port 3000
+    #image: alternatively your docker image (exposed on port 3000)
     ports:
       - 3000
     restart: always
@@ -28,6 +29,9 @@ services:
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
+    depends_on:
+      - db
+      - web
     ports:
       - "80:80"
       - "443:443"
